@@ -1,0 +1,47 @@
+{
+  "name": "jwttosaml",
+  "version": "1.0.0",
+  "description": "MCP Server and Mock SAP S/4HANA Service demonstrating JWT to SAML 2.0 Principal Propagation",
+  "type": "module",
+  "author": {
+    "name": "eldiebeldie",
+    "email": "eldargr@gmail.com",
+    "url": "https://github.com/eldiebeldie"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eldiebeldie/jwttosaml.git"
+  },
+  "homepage": "https://github.com/eldiebeldie/jwttosaml#readme",
+  "bugs": {
+    "url": "https://github.com/eldiebeldie/jwttosaml/issues"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "sap",
+    "s4hana",
+    "jwt",
+    "saml2",
+    "principal-propagation",
+    "oauth2-saml-bearer",
+    "ai-agents"
+  ],
+  "scripts": {
+    "start": "node src/sapService.js --open",
+    "demo": "node src/sapService.js --open",
+    "demo:cli": "node src/demo.js",
+    "start:sap": "node src/sapService.js",
+    "start:mcp": "node src/mcpServer.js",
+    "test": "node src/demo.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.8.0",
+    "@xmldom/xmldom": "^0.8.10",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "xml-crypto": "^6.0.1",
+    "zod": "^3.24.2"
+  }
+}
