@@ -1,0 +1,26 @@
+[project]
+name = "jwttosaml"
+version = "1.0.0"
+description = "Python MCP Server and Mock SAP S/4HANA Service demonstrating JWT to SAML 2.0 Principal Propagation"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [
+  { name = "eldiebeldie", email = "eldargr@gmail.com" }
+]
+keywords = ["mcp", "sap", "s4hana", "jwt", "saml2", "principal-propagation", "fastapi"]
+dependencies = [
+  "mcp>=2.0.0",
+  "fastapi>=0.115.0",
+  "uvicorn>=0.30.0",
+  "pyjwt>=2.9.0",
+  "cryptography>=43.0.0",
+  "httpx>=0.27.0",
+  "python-multipart>=0.0.9",
+]
+
+[project.urls]
+Homepage = "https://github.com/eldiebeldie/jwttosaml"
+Repository = "https://github.com/eldiebeldie/jwttosaml.git"
+Issues = "https://github.com/eldiebeldie/jwttosaml/issues"
+
