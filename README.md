@@ -7,11 +7,12 @@
 
 <div align="center">
 
-# ⚡️ MCP ➔ JWT ➔ SAML 2.0 ➔ SAP S/4HANA
+# ⚡️ MCP ➔ JWT ➔ SAML 2.0 ➔ SAP S/4HANA (Python)
 ### *The Ultimate AI-Agent-to-SAP Principal Propagation Playground*
 
 [![Author](https://img.shields.io/badge/Author-eldiebeldie-007acc?style=for-the-badge&logo=github)](https://github.com/eldiebeldie)
-[![MCP](https://img.shields.io/badge/Protocol-MCP%20SDK-8A2BE2?style=for-the-badge)](https://modelcontextprotocol.io)
+[![Python](https://img.shields.io/badge/Python-3.11%2B%20%7C%20FastAPI-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org)
+[![MCP](https://img.shields.io/badge/Protocol-Python%20MCP%20SDK-8A2BE2?style=for-the-badge)](https://modelcontextprotocol.io)
 [![SAP S/4HANA](https://img.shields.io/badge/SAP-S%2F4HANA%20OData-0FAAFF?style=for-the-badge&logo=sap)](https://www.sap.com)
 [![Security](https://img.shields.io/badge/Auth-RS256%20JWT%20%E2%9E%94%20SAML%202.0%20XML--DSig-10B981?style=for-the-badge)](#)
 [![License: MIT](https://img.shields.io/badge/License-MIT-F59E0B?style=for-the-badge)](./LICENSE)
@@ -22,7 +23,7 @@
 
 <p align="center">
   <strong>Modern AI Agents speak MCP & JSON Web Tokens. Enterprise SAP speaks SAML 2.0 XML Assertions.</strong><br/>
-  This project bridges both worlds in seconds — complete with a real <strong>MCP Server</strong>, cryptographic <strong>JWT-to-SAML 2.0 translation</strong>, a <strong>Mock SAP S/4HANA Gateway</strong>, and a live <strong>Interactive Flow Visualizer</strong>.
+  Built with the official <strong>Python MCP SDK (<code>MCPServer</code>)</strong>, <strong>FastAPI</strong>, <strong>PyJWT</strong>, and <strong>cryptography</strong> — complete with a live <strong>6-Theme Interactive Flow Studio</strong>.
 </p>
 
 </div>
@@ -34,8 +35,8 @@
 Imagine an AI Agent wants to create a Sales Order (`VA01`) or approve a Purchase Requisition (`ME54N`) in **SAP S/4HANA** on behalf of a real user (`ELDIEBELDIE`).
 You **never** want to use a shared technical system user in SAP — you need **Principal Propagation** so SAP knows *who* the real human is, checks their `SU01` roles, and logs their exact SAP user ID in the audit trail.
 
-Here is how our flow makes that effortless:
-1. 🗣️ **You ask the MCP Server** to perform an SAP action for a user.
+Here is how our Python flow makes that effortless:
+1. 🗣️ **You ask the Python MCP Server** to perform an SAP action for a user.
 2. 🪙 **MCP mints a signed RS256 JWT** capturing the user's identity and intent.
 3. 🧬 **The JWT is transformed into an OASIS SAML 2.0 Bearer Assertion**, signed with an X.509 certificate (`XML-DSig RSA-SHA256`).
 4. 🏢 **SAP receives the SAML 2.0 token**, verifies the cryptographic XML signature, identifies the SAP user (`ELDIEBELDIE` or `ALICE_FIN`), identifies their business request, and executes the SAP transaction!
@@ -52,14 +53,14 @@ flowchart LR
         A["🧑 User Request<br/>(User: ELDIEBELDIE<br/>Action: CREATE_SALES_ORDER)"]
     end
 
-    subgraph MCPLayer["🧠 2. MCP Server (src/mcpServer.js)"]
+    subgraph MCPLayer["🧠 2. Python MCP Server (src/mcp_server.py)"]
         B["🪙 Tool: create_jwt_token<br/>Mints RS256 Signed JWT"]
         C["🔐 Tool: convert_jwt_to_saml<br/>Builds & Signs SAML 2.0 XML"]
         D["📡 Tool: send_saml_to_sap<br/>Authorization: SAML2.0 &lt;base64&gt;"]
         B --> C --> D
     end
 
-    subgraph SAPLayer["🏢 3. Mock SAP S/4HANA (src/sapService.js)"]
+    subgraph SAPLayer["🏢 3. Mock SAP S/4HANA (src/sap_service.py)"]
         E["🛡️ Verify XML-DSig<br/>Trusted IdP X.509 Cert"]
         F["👤 Map NameID ➔ SU01<br/>Identify User & Roles"]
         G["⚙️ Execute Business Logic<br/>VA01 / VA03 / ME54N"]
@@ -83,16 +84,16 @@ flowchart LR
 sequenceDiagram
     autonumber
     actor User as 🧑‍💻 User / Browser UI
-    participant MCP as 🧠 MCP Server<br/>(src/mcpServer.js)
-    participant Crypto as 🔐 JWT & SAML Engine<br/>(src/jwtToSaml.js)
-    participant SAP as 🏢 SAP S/4HANA Service<br/>(src/sapService.js)
+    participant MCP as 🧠 Python MCP Server<br/>(src/mcp_server.py)
+    participant Crypto as 🔐 JWT & SAML Engine<br/>(src/jwt_to_saml.py)
+    participant SAP as 🏢 SAP S/4HANA FastAPI<br/>(src/sap_service.py)
 
     User->>MCP: [Step 0] Send Request (userId="ELDIEBELDIE", action="CREATE_SALES_ORDER")
     activate MCP
-    MCP->>Crypto: createJwtToken({ userId, email, sapClient, userRequest })
+    MCP->>Crypto: create_jwt_token(user_id, email, sap_client, user_request)
     Crypto-->>MCP: [Step 1] Signed RS256 JWT (eyJhbGciOiJSUzI1NiIs...)
 
-    MCP->>Crypto: convertJwtToSaml(jwtToken)
+    MCP->>Crypto: convert_jwt_to_saml(jwt_token)
     Note over Crypto: 1. Verify JWT Signature (RS256)<br/>2. Map Claims ➔ <saml2:Assertion><br/>3. Sign XML with IdP X.509 Cert
     Crypto-->>MCP: [Step 2] Signed SAML 2.0 XML + Base64 Payload
 
@@ -143,22 +144,26 @@ flowchart TD
 
 ## 🚀 How to Run the Demo (1 Command!)
 
-We created a single npm action that boots the **Mock SAP S/4HANA Service**, connects the **MCP Server**, and **automatically pops open your browser** to the interactive visualizer:
-
+### Initial Setup (Once)
 ```bash
-npm run demo
+python -m venv .venv
+.venv\Scripts\pip install -r requirements.txt
 ```
-*(or `npm start`)*
 
-### What Happens When You Run `npm run demo`:
-1. **Starts the SAP S/4HANA Mock Server** at **[http://localhost:4004](http://localhost:4004)**.
-2. **Opens your default browser** directly to `http://localhost:4004`.
+### Run the Interactive Demo & Open Browser
+```bash
+python run_demo.py
+```
+
+### What Happens When You Run `python run_demo.py`:
+1. **Starts the SAP S/4HANA FastAPI Server** at **[http://localhost:4004](http://localhost:4004)**.
+2. **Opens your default browser** directly to `http://localhost:4004` (featuring 6 themes: `Dark`, `Light`, `Cyberpunk`, `SAP Horizon`, `Emerald`, `Sunset`).
 3. **Executes the live MCP ➔ JWT ➔ SAML ➔ SAP flow** and displays:
    - **In your Browser**: Interactive cards for Step 0 (Initial Request), Step 1 (JWT), Step 2 (Signed SAML 2.0 XML), Step 3 (Raw HTTP/1.1 Request to SAP + `curl` + RFC 7522 OAuth2), and Step 4 (SAP HTTP Response).
    - **In your Terminal Console**: Color-coded, human-readable logs + full raw JSON-RPC and HTTP wire payloads.
 
 > 💡 **Prefer a pure terminal run?**
-> Run `npm run demo:cli` to execute the entire flow in your terminal and exit cleanly.
+> Run `python run_demo.py --cli` to execute the entire flow in your terminal and exit cleanly.
 
 ---
 
@@ -166,7 +171,7 @@ npm run demo
 
 Both the **Web Visualizer (`http://localhost:4004`)** and the **Terminal Console** log the **exact raw JSON-RPC and HTTP/1.1 requests** sent at each step:
 
-### 1️⃣ Step 0: MCP JSON-RPC 2.0 Request (`Client ➔ MCP Server`)
+### 1️⃣ Step 0: MCP JSON-RPC 2.0 Request (`Client ➔ Python MCP Server`)
 ```json
 {
   "jsonrpc": "2.0",
@@ -225,72 +230,22 @@ grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Asaml2-bearer&assertion=PHN
 
 ---
 
-## 🖥️ What the Console Logs Look Like (Human-Readable Trace)
+## 🧰 Commands & Architecture
 
-Every run logs a crystal-clear, 5-stage narrative in your terminal so you can see **what is initially sent**, **where it goes**, and **how SAP responds**:
-
-```text
-================================================================================
- 🟢 [STEP 0 - INITIAL REQUEST SENT TO MCP SERVER]
-================================================================================
-  • From       : Client / Browser UI
-  • Sent To    : MCP Server (src/mcpServer.js over stdio) -> Tool: "create_jwt_token"
-  • Who (User) : ELDIEBELDIE (eldiebeldie@enterprise.local), SAP Client: 100
-  • What Action: CREATE_SALES_ORDER
-
---------------------------------------------------------------------------------
- 🔵 [STEP 1 - MCP CREATED SIGNED JWT TOKEN]
---------------------------------------------------------------------------------
-  • Algorithm  : RS256 (Signed with IdP RSA Private Key)
-  • JWT ID     : jwt_b67d5e4d-8faf-45f6-b4b2-adbb1acbd4c9
-  • Subject    : ELDIEBELDIE
-  • Audience   : https://sap-s4hana.enterprise.local/sap/bc/sec/oauth2/token
-  • Embedded SAP Request: {"action":"CREATE_SALES_ORDER","parameters":{...}}
-
---------------------------------------------------------------------------------
- 🟣 [STEP 2 - MCP CONVERTED JWT TO SIGNED SAML 2.0 ASSERTION]
---------------------------------------------------------------------------------
-  • Sent To    : MCP Server -> Tool: "convert_jwt_to_saml"
-  • SAML ID    : _97a5ce6ffe4c4d2b96d449865173199b
-  • NameID     : ELDIEBELDIE
-  • Signature  : Enveloped XML-DSig (RSA-SHA256 + X.509 Certificate)
-
---------------------------------------------------------------------------------
- 🟠 [STEP 3 - ACTUAL HTTP REQUEST SENT TO SAP SERVICE]
---------------------------------------------------------------------------------
-  • Sent From  : MCP Server -> Tool: "send_saml_to_sap"
-  • Sent To URL: POST http://localhost:4004/sap/opu/odata/sap/Z_MCP_GATEWAY_SRV/ExecuteRequest
-  • HTTP Header: Authorization: SAML2.0 PHNhbWwyOkFzc2VydGlvbiB4bWxuczpzYW1s...
-
---------------------------------------------------------------------------------
- ✅ [STEP 4 - ACTUAL HTTP RESPONSE RECEIVED FROM SAP SERVICE]
---------------------------------------------------------------------------------
-  • Endpoint Hit     : POST /sap/opu/odata/sap/Z_MCP_GATEWAY_SRV/ExecuteRequest
-  • SAML Signature   : VALID (Verified against trusted IdP X.509 Certificate)
-  • Identified User  : ELDIEBELDIE — eldiebeldie (SAP Senior Architect) (SAP Client 100)
-  • User Action      : CREATE_SALES_ORDER
-  • SAP Transaction  : VA01 (Create Sales Order)
-  • Execution Result : Sales Order 0000010048 created in SAP Client 100 by ELDIEBELDIE
-================================================================================
-```
-
----
-
-## 🧰 Project Scripts & Architecture
-
-| Script | Command | What It Does |
+| Mode | Command | What It Does |
 | :--- | :--- | :--- |
-| **Interactive Demo (Recommended)** | `npm run demo` | Starts SAP + Visualizer on port `4004` and **auto-opens the browser**. |
-| **CLI Demo** | `npm run demo:cli` | Runs the end-to-end MCP ➔ JWT ➔ SAML ➔ SAP flow in the terminal and exits. |
-| **SAP Service Only** | `npm run start:sap` | Starts the Mock SAP S/4HANA server on `http://localhost:4004` without opening a browser. |
-| **MCP Server (stdio)** | `npm run start:mcp` | Runs [`src/mcpServer.js`](./src/mcpServer.js) over `stdio` for Claude Desktop, Cursor, or Antigravity. |
+| **Interactive Demo (Recommended)** | `python run_demo.py` | Starts SAP FastAPI + Flow Studio UI on port `4004` and **auto-opens the browser**. |
+| **CLI Demo** | `python run_demo.py --cli` | Runs the end-to-end MCP ➔ JWT ➔ SAML ➔ SAP flow in the terminal and exits. |
+| **SAP Service Only** | `python -m src.sap_service` | Starts the Mock SAP S/4HANA server on `http://localhost:4004` without opening a browser. |
+| **MCP Server (stdio)** | `python -m src.mcp_server` | Runs [`src/mcp_server.py`](./src/mcp_server.py) over `stdio` for Claude Desktop, Cursor, or Antigravity. |
 
 ### Key Source Files
-- **[`src/cryptoKeys.js`](./src/cryptoKeys.js)** — Zero-config RSA-2048 keypair & self-signed X.509 IdP certificate generator in pure Node.js `crypto`.
-- **[`src/jwtToSaml.js`](./src/jwtToSaml.js)** — Mints RS256 JWTs, builds OASIS SAML 2.0 Assertions, signs them with Enveloped XML-DSig, and verifies SAML assertions.
-- **[`src/mcpServer.js`](./src/mcpServer.js)** — MCP Server exposing `execute_sap_request`, `create_jwt_token`, `convert_jwt_to_saml`, and `send_saml_to_sap`.
-- **[`src/sapService.js`](./src/sapService.js)** — Mock SAP S/4HANA Gateway (`Z_MCP_GATEWAY_SRV` & `/sap/bc/sec/oauth2/token`) + Live Web Visualizer UI.
-- **[`src/demo.js`](./src/demo.js)** — Automated CLI runner for quick terminal verification.
+- **[`src/crypto_keys.py`](./src/crypto_keys.py)** — Zero-config RSA-2048 keypair & self-signed X.509 v3 IdP certificate generator using Python `cryptography`.
+- **[`src/jwt_to_saml.py`](./src/jwt_to_saml.py)** — Mints RS256 JWTs (`PyJWT`), builds OASIS SAML 2.0 Assertions, signs them with Enveloped XML-DSig (`RSA-SHA256`), and verifies SAML assertions.
+- **[`src/mcp_server.py`](./src/mcp_server.py)** — Official Python MCP Server (`MCPServer`) exposing `execute_sap_request`, `create_jwt_token`, `convert_jwt_to_saml`, and `send_saml_to_sap`.
+- **[`src/sap_service.py`](./src/sap_service.py)** — FastAPI Mock SAP S/4HANA Gateway (`Z_MCP_GATEWAY_SRV` & `/sap/bc/sec/oauth2/token`) + Live 6-Theme Web Flow Studio UI.
+- **[`src/demo.py`](./src/demo.py)** — Automated CLI runner for terminal verification.
+- **[`run_demo.py`](./run_demo.py)** — One-command launcher that automatically uses `.venv` if present.
 
 ---
 
